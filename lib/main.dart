@@ -32,7 +32,7 @@ class _TestState extends State<Test> {
       } else {
         print('User is signed in!');
       }
-    }); 
+    });
     super.initState();
   }
 

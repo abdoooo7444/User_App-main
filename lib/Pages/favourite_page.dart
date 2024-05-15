@@ -1,63 +1,130 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:project_second/Pages/show_page.dart';
+import 'package:project_second/models/properties.dart';
+import 'package:project_second/services/favourite_api_service.dart';
 
 class Favorites extends StatefulWidget {
+  const Favorites({super.key});
+
   @override
-  _HomePageState createState() => _HomePageState();
+  _FavoritesState createState() => _FavoritesState();
 }
 
-class _HomePageState extends State<Favorites> {
-  List favourites = [];
-  int currentIndex = 0; // Add a default value
-
-  void getfavourite() async {
-    CollectionReference tblProduct =
-        FirebaseFirestore.instance.collection('favourites');
-    await Future.delayed(Duration(seconds: 2));
-    await tblProduct.get().then((querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        Map<String, dynamic> store = doc.data() as Map<String, dynamic>;
-        store['documentId'] = doc.id;
-        favourites.add(store);
-      });
-
-      isloading = false;
-      setState(() {});
-    });
-  }
-
-  void deletefavourites (String docID, int index) {
-    FirebaseFirestore.instance.collection('favourites').doc(docID).delete();
-    favourites.removeAt(index);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Deleted Successfuly'),
-      backgroundColor: Colors.green,
-    ));
-    setState(() {});
-  }
-
+class _FavoritesState extends State<Favorites> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchAddress = '';
+  List<Property> favourites = [];
   bool isloading = true;
 
   @override
   void initState() {
-    getfavourite();
+    getFavourite();
+    searchProperty();
     super.initState();
+  }
+
+  Future<void> getFavourite() async {
+    try {
+      final data = await favouriteApiServices().getfavourite();
+      setState(() {
+        isloading = true;
+      });
+
+      favourites = data;
+      print("============================================");
+      print(favourites[0].status);
+      print(favourites[0].longitude);
+      print("============================================");
+      setState(() {
+        isloading = false;
+      });
+    } catch (e) {}
+  }
+
+  Future<void> searchProperty() async {
+    setState(() {
+      isloading = true;
+    });
+    try {
+      Property favourite = Property(
+          propertyaddress: _searchAddress, price: int.parse(_searchAddress));
+
+      Property? singleFavourite =
+          await favouriteApiServices().getSingleFavourite(favourite);
+      if (singleFavourite != null) {
+        setState(() {
+          favourites = [singleFavourite];
+          isloading = false;
+        });
+      } else {
+        setState(() {
+          favourites = [];
+          isloading = false;
+        });
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: const Text('Failed to find the property you want.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      setState(() {
+        favourites = [];
+        isloading = false;
+      });
+
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return AlertDialog(
+      //       title: const Text('Error'),
+      //       content: const Text('Failed to fetch data from server.'),
+      //       actions: <Widget>[
+      //         TextButton(
+      //           onPressed: () {
+      //             Navigator.of(context).pop();
+      //           },
+      //           child: const Text('OK'),
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // );
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isloading == true
-          ? Center(child: CircularProgressIndicator())
+      body: isloading
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Container(
                   alignment: Alignment.topLeft,
-                  padding: EdgeInsets.only(top: 20.0, left: 8.0),
+                  padding: const EdgeInsets.only(top: 20.0, left: 8.0),
                   child: IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.arrow_back,
                       size: 30.0,
                       color: Color.fromRGBO(118, 165, 209, 1),
@@ -68,132 +135,127 @@ class _HomePageState extends State<Favorites> {
                   ),
                 ),
                 Container(
-                  margin:
-                      EdgeInsets.symmetric(horizontal: 40.0, vertical: 10.0),
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 40.0, vertical: 10.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(30.0),
                   ),
                   child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search',
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search by Address or price ',
                       hintStyle: TextStyle(
                         fontFamily: "Inria Serif",
                       ),
                       icon: Icon(Icons.search),
                       border: InputBorder.none,
                     ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchAddress = value;
+                      });
+                    },
                   ),
                 ),
-                SizedBox(height: 10.0),
+                const SizedBox(height: 10.0),
                 Expanded(
                   child: ListView.builder(
                     itemCount: favourites.length,
                     itemBuilder: (context, index) {
                       return InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => SingleProperty(
+                                  data: favourites[index].toMap()),
+                            ),
+                          );
+                        },
                         child: Container(
-                          padding: EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
                           child: Column(
                             children: [
                               GestureDetector(
-                                onTap:  (){
-                                    Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      SingleProperty(data: favourites[index]),
-                                ),
-                              );
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => SingleProperty(
+                                          data: favourites[index].toMap()),
+                                    ),
+                                  );
                                 },
-                                onLongPress: () 
-                                {
+                                onLongPress: () {
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: Text(
-                                          "remove from favourites",
+                                        title: const Text(
+                                          "Remove from favorites",
                                           style: TextStyle(
                                             fontFamily: "Inria Serif",
                                           ),
                                         ),
-                                        content: Text(
-                                            "Are you sure you want to remove from favourites?",
-                                            style: TextStyle(
-                                                fontFamily: "Inria Serif")),
+                                        content: const Text(
+                                          "Are you sure you want to remove from favorites?",
+                                          style: TextStyle(
+                                            fontFamily: "Inria Serif",
+                                          ),
+                                        ),
                                         actions: [
                                           TextButton(
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
-                                            child: Text("Cancel",
-                                                style: TextStyle(
-                                                    fontFamily: "Inria Serif")),
+                                            child: const Text(
+                                              "Cancel",
+                                              style: TextStyle(
+                                                fontFamily: "Inria Serif",
+                                              ),
+                                            ),
                                           ),
                                           TextButton(
                                             onPressed: () {
-                                              Navigator.pop(context);
-                                              deletefavourites(
-                                                  " ${favourites[index]['documentId']}",
-                                                  index);
-                                              setState(() {});
+                                              // Navigator.pop(context);
+                                              // deleteFavourite(
+                                              //     " ${favourites[index]['documentId']}",
+                                              //     index);
                                             },
-                                            child: Text("remove",
-                                                style: TextStyle(
-                                                    fontFamily: "Inria Serif")),
+                                            child: const Text(
+                                              "Remove",
+                                              style: TextStyle(
+                                                fontFamily: "Inria Serif",
+                                              ),
+                                            ),
                                           ),
                                         ],
-                                      );
+                                      ); // This was missing
                                     },
                                   );
-
-                                  // Navigator.of(context).push(
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) =>
-                                  //         SingleProperty(data: favourites[index]),
-                                  //   ),
-                                  // );
                                 },
-                                child: Container(
-                                  padding: EdgeInsets.all(20),
-                                  width: double.infinity,
-                                  color: Colors.grey[200],
-                                  child: Image.network(
-                                    '${favourites[index]['image']}',
-                                    height: 225,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              Container(
                                 child: Column(
                                   children: [
-                                    Row(
-                                      children: [
-                                        Spacer(
-                                          flex: 1,
-                                        ),
-                                        Text(
-                                          '${favourites[index]['propertyStatus']} ',
-                                          style: TextStyle(
-                                              fontFamily: "Inria Serif",
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        Spacer(
-                                          flex: 1,
-                                        ),
-                                        Text(
-                                            '${favourites[index]['propertyPrice']} \$',
-                                            style: TextStyle(
-                                                fontFamily: "Inria Serif",
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold)),
-                                        Spacer(
-                                          flex: 1,
-                                        ),
-                                      ],
+                                    Container(
+                                      // height: 100,
+                                      padding: const EdgeInsets.all(20),
+                                      width: double.infinity,
+                                      color: Colors.grey[200],
+                                      child:
+                                          //  Image.network(
+                                          //     // '${favourites[index].image}',
+                                          //     // height: 225,
+                                          //     // fit: BoxFit.fill,
+                                          //     ),
+                                          Text(
+                                        '${favourites[index].type}'
+                                        '${favourites[index].latitude}'
+                                        '${favourites[index].longitude}',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                            fontFamily: "Inria Serif"),
+                                      ),
                                     ),
                                   ],
                                 ),

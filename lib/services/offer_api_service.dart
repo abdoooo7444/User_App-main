@@ -8,7 +8,7 @@ class OfferApiServices {
     // Call super constructor
     dio = Dio(
       BaseOptions(
-        baseUrl: "http://192.168.1.8:4000",
+        baseUrl: "http://10.0.2.2:4000",
       ),
     );
   }

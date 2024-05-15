@@ -6,15 +6,18 @@ class ApiServices {
 
   ApiServices() {
     dio = Dio(BaseOptions(
-      baseUrl: "http://192.168.1.8:4000",
+      baseUrl: "http://10.0.2.2:4000",
     ));
   }
 
   Future<List<Property>> getResidential() async {
     try {
       final Response<List<dynamic>> response =
-          await dio.get('/api/properties/Res');
+          await dio.get('/api/properties/Comm');
 
+      print("===========================================");
+      print(response.data);
+      print("===========================================");
       List<Property> properties = [];
 
       if (response.data != null) {
@@ -53,9 +56,9 @@ class ApiServices {
     try {
       final Response<List<dynamic>> response =
           await dio.get('/api/properties/Comm');
-      print("===========================================");
+      print("====================ccccccccc=======================");
       print(response.data);
-      print("===========================================");
+      print("=============================cccccccc==============");
       List<Property> properties = [];
 
       if (response.data != null) {
@@ -71,10 +74,30 @@ class ApiServices {
     }
   }
 
-  Future<Property?> getSingleCommercialByAddress(String propertyaddress) async {
+  Future<Property?> getSingleCommercialByQuery(String search) async {
     try {
       final Response<Map<String, dynamic>> response = await dio.get(
-        '/api/properties/Comm/$propertyaddress', // Use "/Comm/$address" for commercial properties
+        '/api/properties//$search?', // Use "/Comm/$address" for commercial properties
+      );
+
+      if (response.data != null) {
+        return Property.fromJson(response.data!);
+      } else
+        (error) {
+          print(error);
+          print("=============response.data=============");
+          ; // Indicate no property found
+        };
+    } catch (e) {
+      print('Error retrieving commercial property by address: $e');
+      // rethrow;
+    }
+  }
+
+  Future<Property?> getSingleResdentialByAddress(String search) async {
+    try {
+      final Response<Map<String, dynamic>> response = await dio.get(
+        '/api/properties/Comm/$search?', // Use "/Comm/$address" for commercial properties
       );
 
       if (response.data != null) {
@@ -94,10 +117,10 @@ class ApiServices {
     }
   }
 
-  Future<Property?> getSingleResdentialByAddress(String propertyaddress) async {
+  Future<Property?> getSingleCommercialByAddress(String search) async {
     try {
       final Response<Map<String, dynamic>> response = await dio.get(
-        '/api/properties/Comm/$propertyaddress', // Use "/Comm/$address" for commercial properties
+        '/api/properties/Comm/$search?', // Use "/Comm/$address" for commercial properties
       );
 
       if (response.data != null) {

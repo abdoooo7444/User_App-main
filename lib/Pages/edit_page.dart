@@ -1,7 +1,6 @@
+// ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
-
-
 
 class EditPage extends StatelessWidget {
   @override
@@ -20,32 +19,30 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  TextEditingController _controllerUserName = TextEditingController();
-  TextEditingController _controllerEmail = TextEditingController();
-  TextEditingController _controllerPassword = TextEditingController();
-  late Future<String> _dataFromDatabaseUserName;
+  final TextEditingController _controllerUserName = TextEditingController();
+  final TextEditingController _controllerEmail = TextEditingController();
+  final TextEditingController _controllerPassword = TextEditingController();
   late Future<String> _dataFromDatabaseEmail;
 
   @override
   void initState() {
     super.initState();
-    _dataFromDatabaseUserName = fetchDataFromDatabase('UserName');
     _dataFromDatabaseEmail = fetchDataFromDatabase('Email');
   }
 
   @override
   Widget build(BuildContext context) {
     InputDecoration commonInputDecoration = InputDecoration(
-      contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+      contentPadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
       filled: true,
       fillColor: Colors.white,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(color: Colors.black),
+        borderSide: const BorderSide(color: Colors.black),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(color: Colors.black),
+        borderSide: const BorderSide(color: Colors.black),
       ),
     );
 
@@ -53,7 +50,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       appBar: AppBar(
         elevation: 1,
         leading: IconButton(
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back,
             color: Color.fromRGBO(65, 73, 106, 1),
           ),
@@ -63,14 +60,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
       ),
       body: Container(
-        padding: EdgeInsets.only(left: 16, top: 25, right: 16),
+        padding: const EdgeInsets.only(left: 16, top: 25, right: 16),
         child: ListView(
           children: [
-            Text(
+            const Text(
               "Edit Profile",
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
             ),
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
             Center(
@@ -92,7 +89,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         ),
                       ],
                       shape: BoxShape.circle,
-                      image: DecorationImage(
+                      image: const DecorationImage(
                         fit: BoxFit.cover,
                         image: AssetImage(
                             "assets/a80e3690318c08114011145fdcfa3ddb.jpg"),
@@ -111,9 +108,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           width: 4,
                           color: Theme.of(context).scaffoldBackgroundColor,
                         ),
-                        color: Color.fromRGBO(118, 165, 209, 1),
+                        color: const Color.fromRGBO(118, 165, 209, 1),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.edit,
                         color: Colors.white,
                       ),
@@ -122,7 +119,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ],
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             MyEditableTextField(
               labelText: 'User Name',
               controller: _controllerUserName,
@@ -145,7 +142,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             const SizedBox(
               height: 40,
             ),
-            Text("Your Password",
+            const Text("Your Password",
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(
               height: 10,
@@ -155,10 +152,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: TextFormField(
                 controller: _controllerPassword,
                 obscureText: true,
-                style: TextStyle(
+                style: const TextStyle(
                     fontWeight: FontWeight.bold), // Make password text bold
                 decoration: commonInputDecoration.copyWith(
-                  prefixIcon: Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock),
                   labelText: 'Current Password',
                 ),
               ),
@@ -170,7 +167,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               padding: const EdgeInsets.only(left: 5, right: 10),
               child: TextFormField(
                 decoration: commonInputDecoration.copyWith(
-                  prefixIcon: Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock),
                   hintText: 'New Password',
                 ),
               ),
@@ -182,7 +179,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               padding: const EdgeInsets.only(left: 5, right: 10),
               child: TextFormField(
                 decoration: commonInputDecoration.copyWith(
-                  prefixIcon: Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock),
                   hintText: 'Confirm Password',
                 ),
               ),
@@ -192,13 +189,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                // primary: Color.fromRGBO(118, 165, 209, 1),
-              ),
+                  // primary: Color.fromRGBO(118, 165, 209, 1),
+                  ),
               onPressed: () {
                 // Add logic for saving changes
                 print('Save button pressed');
               },
-              child: Text(
+              child: const Text(
                 '   Save   ',
                 style: TextStyle(fontSize: 30, color: Colors.white),
               ),
@@ -243,17 +240,17 @@ class _MyEditableTextFieldState extends State<MyEditableTextField> {
       children: [
         Text(
           widget.labelText,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         FutureBuilder<String>(
           future: _dataFromDatabase,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else {
@@ -276,7 +273,6 @@ class _MyEditableTextFieldState extends State<MyEditableTextField> {
 
 Future<String> fetchDataFromDatabase(String fieldName) async {
   // fetch from database
-  await Future.delayed(Duration(seconds: 2));
+  await Future.delayed(const Duration(seconds: 2));
   return 'Data for $fieldName';
 }
-

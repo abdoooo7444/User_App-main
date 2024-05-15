@@ -44,7 +44,7 @@ class _HomePageState extends State<ShowCommercial> {
 
   Future<Property?> _searchCommercialProperty(String address) async {
     try {
-      final data = await ApiServices().getSingleCommercialByAddress(address);
+      final data = await ApiServices().getSingleCommercialByQuery(address);
       if (data != null) {
         return data;
       } else {

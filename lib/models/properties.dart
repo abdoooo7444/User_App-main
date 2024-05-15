@@ -11,6 +11,7 @@ class Property {
   String? rentDuration;
   double? latitude;
   double? longitude;
+  String? color;
   int? v;
 
   Property({
@@ -18,6 +19,7 @@ class Property {
     this.kind,
     this.status,
     this.type,
+    this.color,
     this.propertyaddress,
     this.price,
     this.phoneNmber,
@@ -33,6 +35,7 @@ class Property {
         id: json['_id'] as String?,
         kind: json['kind'] as String?,
         status: json['status'] as String?,
+        color: json['color'] as String?,
         type: json['type'] as String?,
         propertyaddress: json['propertyaddress'] as String?,
         price: json['price'] as int?,
@@ -54,6 +57,7 @@ class Property {
         'price': price,
         'PhoneNmber': phoneNmber,
         'moreDetails': moreDetails,
+        'color': color,
         'rentDuration': rentDuration,
         'image': image,
         'longitude': longitude,
@@ -66,6 +70,7 @@ class Property {
         'kind': kind,
         'status': status,
         'type': type,
+        'color': color,
         'propertyaddress': propertyaddress,
         'price': price,
         'Phonember': phoneNmber, // Corrected typo

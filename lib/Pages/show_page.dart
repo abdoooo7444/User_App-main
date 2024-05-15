@@ -1,17 +1,15 @@
-// ignore_for_file: prefer_const_constructors, unused_import, missing_required_param, prefer_const_literals_to_create_immutables
+// ignore_for_file: use_build_context_synchronously, avoid_print, missing_required_param, deprecated_member_use
 
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_second/Pages/home_page.dart';
 import 'package:project_second/Pages/tour_request_page.dart';
-import 'package:project_second/helper/ShowSnackBar.dart';
 import 'package:project_second/models/offers_model.dart';
+import 'package:project_second/models/properties.dart';
+import 'package:project_second/services/favourite_api_service.dart';
 import 'package:project_second/services/offer_api_service.dart';
-import 'package:project_second/services/property_api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -31,12 +29,6 @@ final numberController = TextEditingController();
 
 ///
 
-///
-// double lat1 = -1.546696;
-// double long1 = 64.053505;
-// double lat2 = 17.844916;
-// double long2 = 197.736456;
-//
 bool isFavorite = false;
 
 ///
@@ -100,8 +92,18 @@ class _CCState extends State<SingleProperty> {
   void initState() {
     //getCurrentlocation();
     //initialstreem();
-    // checkFavoriteStatus();
+    checkFavoriteStatus();
     super.initState();
+  }
+
+  Future<bool> checkFavoriteStatus() async {
+    try {
+      final Favorite = await favouriteApiServices().checkIfFavourite(favourite);
+      return isFavorite = true;
+    } catch (e) {
+      print('Error checking favorite status: $e');
+      return false; // Default to not favorite if there's an error
+    }
   }
 
   void launchWhatsapp({@required number, @required message}) async {
@@ -126,42 +128,16 @@ class _CCState extends State<SingleProperty> {
     }
   }
 
-  // void checkFavoriteStatus() async {
-  //   try {
-  //     CollectionReference collRef =
-  //         FirebaseFirestore.instance.collection('favourites');
-
-  //     QuerySnapshot existingFavorites = await collRef
-  //         .where('id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-  //         .where('propertyType', isEqualTo: '${widget.data['propertyType']}')
-  //         .where('latitude', isEqualTo: '${widget.data['latitude']}')
-  //         .where('longitude', isEqualTo: '${widget.data['latitude']}')
-  //         .where('address', isEqualTo: '${widget.data['propertyAdress']}')
-  //         .where('oldphoneNumber', isEqualTo: '${widget.data['phoneNumber']}')
-  //         .where('propertyDetails',
-  //             isEqualTo: '${widget.data['propertyDetails']}')
-  //         .where('propertyPrice', isEqualTo: '${widget.data['propertyPrice']}')
-  //         .where('propertyRentDuration',
-  //             isEqualTo: '${widget.data['propertyRentDuration']}')
-  //         .where('propertyStatus',
-  //             isEqualTo: '${widget.data['propertyStatus']}')
-  //         .get();
-
-  //     setState(() {
-  //       isFavorite = existingFavorites.docs.isNotEmpty;
-  //     });
-  //   } catch (e) {
-  //     print('Error checking data in Firestore: $e');
-  //   }
-  // }
+  bool isFavorite = false;
+  Property favourite = Property();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffFFFFFF),
+      backgroundColor: const Color(0xffFFFFFF),
       key: _ss,
       appBar: AppBar(
-        leading: BackButton(
+        leading: const BackButton(
           color: Color.fromRGBO(118, 165, 209, 1),
           // Adjust the size as needed
         ),
@@ -171,7 +147,7 @@ class _CCState extends State<SingleProperty> {
         //mainAxisAlignment:MainAxisAlignment.end,
         children: [
           Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             width: double.infinity,
             color: Colors.grey[200],
             // child: Image.network(
@@ -181,67 +157,58 @@ class _CCState extends State<SingleProperty> {
             //   fit: BoxFit.cover,
             // ),
           ),
-          // GestureDetector(
-          //   onTap: () async {
-          //     try {
-          //       CollectionReference collRef =
-          //           FirebaseFirestore.instance.collection('favourites');
+          GestureDetector(
+            onTap: () async {
+              try {
+                if (!isFavorite) {
+                  favourite = Property.fromJson(
+                    widget.data,
+                  );
+                  //               favourite = Property.fromJson({
+                  //   ...widget.data,
+                  //   'color': color,
+                  // });
+                  // The property is not in favorites, so add it
+                  favouriteApiServices().addtoFavourite(favourite);
 
-          //       if (!isFavorite) {
-          //         // The property is not in favorites, so add it
-          //         await collRef.add({
-          //           "id": FirebaseAuth.instance.currentUser!.uid,
-          //           'image': '${widget.data['image']}',
-          //           'propertyType': '${widget.data['propertyType']}',
-          //           'latitude': '${widget.data['latitude']}',
-          //           'longitude': '${widget.data['longitude']}',
-          //           'address': '${widget.data['propertyAdress']}',
-          //           'oldphoneNumber': '${widget.data['phoneNumber']}',
-          //           'propertyDetails': '${widget.data['propertyDetails']}',
-          //           'propertyPrice': '${widget.data['propertyPrice']}',
-          //           'propertyRentDuration':
-          //               '${widget.data['propertyRentDuration']}',
-          //           'propertyStatus': '${widget.data['propertyStatus']}',
-          //         });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      backgroundColor: Colors.green,
+                      content: Text('Favorite Added Successfully'),
+                    ),
+                  );
+                } else {
+                  // The property is already in favorites
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      backgroundColor: Colors.red,
+                      content: Text('Removed Successfully'),
+                    ),
+                  );
+                }
 
-          //         ScaffoldMessenger.of(context).showSnackBar(
-          //           SnackBar(
-          //             backgroundColor: Colors.green,
-          //             content: Text('Favorite Added Successfully'),
-          //           ),
-          //         );
-          //       } else {
-          //         // The property is already in favorites
-          //         ScaffoldMessenger.of(context).showSnackBar(
-          //           SnackBar(
-          //             backgroundColor: Colors.red,
-          //             content: Text('Removed Successfully'),
-          //           ),
-          //         );
-          //       }
-
-          //       setState(() {
-          //         isFavorite = !isFavorite; // Toggle the favorite status
-          //       });
-          //     } catch (e) {
-          //       print('Error adding/checking data in Firestore: $e');
-          //     }
-          //   },
-          //   child: Align(
-          //     alignment: Alignment.topRight,
-          //     child: Padding(
-          //       padding: const EdgeInsets.only(right: 40, top: 16),
-          //       child: Icon(
-          //         isFavorite
-          //             ? Icons.favorite_rounded
-          //             : Icons.favorite_outline_rounded,
-          //         size: 40,
-          //         color: isFavorite ? Colors.red : Colors.grey,
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          Container(
+                setState(() {
+                  isFavorite = !isFavorite; // Toggle the favorite status
+                });
+              } catch (e) {
+                print('Error adding/checking data : $e');
+              }
+            },
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 40, top: 16),
+                child: Icon(
+                  isFavorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_outline_rounded,
+                  size: 40,
+                  color: isFavorite ? Colors.red : Colors.grey,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
             // color: const Color.fromARGB(255, 184, 171, 171),
             height: 200,
             width: double.infinity,
@@ -249,14 +216,14 @@ class _CCState extends State<SingleProperty> {
               padding: const EdgeInsets.all(20.0),
               child: Text(
                 "A ${widget.data['type']} for ${widget.data['status']} in ${widget.data['propertyaddress']}   \n ${widget.data['moreDetails']} \n the ${widget.data['status']} price is: ${widget.data['price']} \$ \n is empty for ${widget.data['rentDuration']} Months ",
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     fontFamily: "Inria Serif"),
               ),
             ),
           ),
-          Container(
+          const SizedBox(
             height: 150,
             child: Column(
               children: [
@@ -280,7 +247,7 @@ class _CCState extends State<SingleProperty> {
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           Row(
@@ -289,12 +256,12 @@ class _CCState extends State<SingleProperty> {
             children: [
               OutlinedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  textStyle: TextStyle(
+                  foregroundColor: Colors.black,
+                  textStyle: const TextStyle(
                     fontSize: 15,
                   ),
-                  // onPrimary: Colors.black,
-                  side: BorderSide(width: 0, color: Colors.white),
-                  backgroundColor: Color.fromRGBO(118, 165, 209, 1),
+                  side: const BorderSide(width: 0, color: Colors.white),
+                  backgroundColor: const Color.fromRGBO(118, 165, 209, 1),
                 ),
                 onPressed: () {
                   _ss.currentState!.showBottomSheet(
@@ -304,8 +271,8 @@ class _CCState extends State<SingleProperty> {
                         width: double.infinity,
                         child: Column(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 16),
                               child: Text(
                                 "Make Offer",
                                 style: TextStyle(
@@ -316,7 +283,7 @@ class _CCState extends State<SingleProperty> {
                               ),
                             ),
 
-                            SizedBox(
+                            const SizedBox(
                               height: 20,
                             ),
                             Row(
@@ -335,11 +302,11 @@ class _CCState extends State<SingleProperty> {
                                         ),
                                         borderRadius:
                                             BorderRadius.circular(5.0),
-                                        color: Color(0xffEEF1F6),
+                                        color: const Color(0xffEEF1F6),
                                       ),
                                       height: 40,
                                       width: 125,
-                                      child: Center(
+                                      child: const Center(
                                         child: Text(
                                           " -5%",
                                           style: TextStyle(
@@ -351,7 +318,7 @@ class _CCState extends State<SingleProperty> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 4,
                                 ),
                                 GestureDetector(
@@ -365,11 +332,11 @@ class _CCState extends State<SingleProperty> {
                                         width: .1,
                                       ),
                                       borderRadius: BorderRadius.circular(5.0),
-                                      color: Color(0xffEEF1F6),
+                                      color: const Color(0xffEEF1F6),
                                     ),
                                     height: 40,
                                     width: 125,
-                                    child: Center(
+                                    child: const Center(
                                       child: Text(
                                         "-10%",
                                         style: TextStyle(
@@ -380,7 +347,7 @@ class _CCState extends State<SingleProperty> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 4,
                                 ),
                                 Padding(
@@ -398,11 +365,11 @@ class _CCState extends State<SingleProperty> {
                                         ),
                                         borderRadius:
                                             BorderRadius.circular(5.0),
-                                        color: Color(0xffEEF1F6),
+                                        color: const Color(0xffEEF1F6),
                                       ),
                                       height: 40,
                                       width: 125,
-                                      child: Center(
+                                      child: const Center(
                                         child: Text(
                                           " -15%",
                                           style: TextStyle(
@@ -422,27 +389,26 @@ class _CCState extends State<SingleProperty> {
                                 padding: const EdgeInsets.only(left: 16),
                                 child: Text(
                                   "${widget.data['status']} you want",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 18, fontFamily: "Inria Serif"),
                                 ),
                               ),
                             ),
                             /////////////////////////////
 
-                            Container(
+                            SizedBox(
                               width: 400,
                               child: TextFormField(
                                 controller: rentController,
                                 decoration: InputDecoration(
-                                  labelStyle:
-                                      TextStyle(fontFamily: "Inria Serif"),
+                                  labelStyle: const TextStyle(
+                                      fontFamily: "Inria Serif"),
                                   labelText: '${widget.data['price']}',
                                   fillColor: Colors.grey,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
-                                      color: const Color.fromARGB(
-                                          255, 123, 24, 24),
+                                    borderSide: const BorderSide(
+                                      color: Color.fromARGB(255, 123, 24, 24),
                                       width: 1,
                                     ),
                                   ),
@@ -451,8 +417,8 @@ class _CCState extends State<SingleProperty> {
                             ),
                             Container(
                               alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 16),
+                              child: const Padding(
+                                padding: EdgeInsets.only(left: 16),
                                 child: Text(
                                   "Enter your Name",
                                   style: TextStyle(
@@ -460,7 +426,7 @@ class _CCState extends State<SingleProperty> {
                                 ),
                               ),
                             ),
-                            Container(
+                            SizedBox(
                               width: 400,
                               child: TextFormField(
                                 controller: nameController,
@@ -468,7 +434,7 @@ class _CCState extends State<SingleProperty> {
                                   fillColor: Colors.grey,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Colors.grey,
                                       width: 1,
                                     ),
@@ -478,8 +444,8 @@ class _CCState extends State<SingleProperty> {
                             ),
                             Container(
                               alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 16),
+                              child: const Padding(
+                                padding: EdgeInsets.only(left: 16),
                                 child: Text(
                                   "Enter your Email",
                                   style: TextStyle(
@@ -487,7 +453,7 @@ class _CCState extends State<SingleProperty> {
                                 ),
                               ),
                             ),
-                            Container(
+                            SizedBox(
                               width: 400,
                               child: TextFormField(
                                 controller: mailController,
@@ -495,7 +461,7 @@ class _CCState extends State<SingleProperty> {
                                   fillColor: Colors.grey,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Colors.grey,
                                       width: 1,
                                     ),
@@ -505,8 +471,8 @@ class _CCState extends State<SingleProperty> {
                             ),
                             Container(
                               alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 16),
+                              child: const Padding(
+                                padding: EdgeInsets.only(left: 16),
                                 child: Text(
                                   "Enter your number",
                                   style: TextStyle(
@@ -514,7 +480,7 @@ class _CCState extends State<SingleProperty> {
                                 ),
                               ),
                             ),
-                            Container(
+                            SizedBox(
                               width: 400,
                               child: TextFormField(
                                 controller: numberController,
@@ -522,7 +488,7 @@ class _CCState extends State<SingleProperty> {
                                   fillColor: Colors.grey,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Colors.grey,
                                       width: 1,
                                     ),
@@ -530,12 +496,12 @@ class _CCState extends State<SingleProperty> {
                                 ),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 20,
                             ),
                             Row(
                               children: [
-                                Spacer(
+                                const Spacer(
                                   flex: 1,
                                 ),
 
@@ -572,7 +538,8 @@ class _CCState extends State<SingleProperty> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => HomePage()),
+                                              builder: (context) =>
+                                                  const HomePage()),
                                         );
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
@@ -618,14 +585,14 @@ class _CCState extends State<SingleProperty> {
                                   },
                                   child: const Text("Add Property"),
                                 ),
-                                Spacer(
+                                const Spacer(
                                   flex: 1,
                                 ),
                                 ElevatedButton(
                                   onPressed: () {
                                     Navigator.pop(context);
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     "Cancel",
                                     style: TextStyle(
                                       fontSize: 20,
@@ -634,7 +601,7 @@ class _CCState extends State<SingleProperty> {
                                   ),
                                 ),
 
-                                Spacer(
+                                const Spacer(
                                   flex: 1,
                                 )
                               ],
@@ -645,24 +612,24 @@ class _CCState extends State<SingleProperty> {
                     ),
                   );
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.local_offer_rounded,
                   color: Colors.white,
                   size: 20,
                 ),
-                label: Text(
+                label: const Text(
                   "Make Offer ",
                   style: TextStyle(fontFamily: "Inria Serif"),
                 ),
               ),
               OutlinedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  textStyle: TextStyle(
+                  textStyle: const TextStyle(
                     fontSize: 15,
                   ),
                   // onPrimary: Colors.black,
-                  side: BorderSide(width: 0, color: Colors.white),
-                  backgroundColor: Color.fromRGBO(118, 165, 209, 1),
+                  side: const BorderSide(width: 0, color: Colors.white),
+                  backgroundColor: const Color.fromRGBO(118, 165, 209, 1),
                 ),
                 onPressed: () {
                   Navigator.push(
@@ -673,19 +640,19 @@ class _CCState extends State<SingleProperty> {
                         ),
                       ));
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.calendar_month_rounded,
                   color: Colors.white,
                   size: 20,
                 ),
-                label: Text(
+                label: const Text(
                   " Tour Request ",
                   style: TextStyle(fontFamily: "Inria Serif"),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 19),
+          const SizedBox(height: 19),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -739,7 +706,7 @@ class _CCState extends State<SingleProperty> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Discounted Price'),
+          title: const Text('Discounted Price'),
           content:
               Text('Discounted Price: \$${discountedPrice.toStringAsFixed(2)}'),
           actions: [
@@ -747,7 +714,7 @@ class _CCState extends State<SingleProperty> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),

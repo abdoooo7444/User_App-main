@@ -8,10 +8,11 @@ class tourApiServices {
   tourApiServices() {
     dio = Dio(
       BaseOptions(
-        baseUrl: "http://192.168.1.8:4000",
+        baseUrl: "http://10.0.2.2:4000",
       ),
     );
   }
+
   Future<TourRequest?> addNewTour(TourRequest request) async {
     try {
       final Response<Map<String, dynamic>> response =
