@@ -36,12 +36,15 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         isloading = true;
       });
-      final data = await ApiServices().getallProperty();
-      Properties = data;
+      Properties = await ApiServices().getallProperty();
       setState(() {
         isloading = false;
       });
-    } catch (e) {}
+    } catch (e) {
+      print("=================");
+      print(e);
+      print("=================");
+    }
   }
 
   void UserAccount() async {
@@ -69,7 +72,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<Property?> _searchCommercialProperty(String address) async {
     try {
-      final data = await ApiServices().getSinglePropertyByAddress(address);
+      final data = await ApiServices().getSingleResdentialByAddress(address);
       if (data != null) {
         return data;
       } else {
@@ -98,18 +101,18 @@ class _HomePageState extends State<HomePage> {
           'status': property.status,
           'kind': property.kind,
           'moreDetails': property.moreDetails,
-          'phoneNmber': property.phoneNmber,
+          'phoneNumber': property.phoneNumber,
           'price': property.price,
           'rentDuration': property.rentDuration,
           'type': property.type,
         };
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SingleProperty(data: propertyMap),
-          ),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => SingleProperty(data: propertyMap),
+        //   ),
+        // );
         print("Found commercial property: ${property.propertyaddress}");
       } else {
         print("No commercial property found at $address");
@@ -374,8 +377,8 @@ class _HomePageState extends State<HomePage> {
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => SingleProperty(
-                                      data: Properties[index].toMap()),
+                                  builder: (context) =>
+                                      SingleProperty(data: Properties[index]),
                                 ),
                               );
                             },
@@ -389,16 +392,21 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.all(20),
                                     width: 200,
                                     color: Colors.grey[200],
-                                    // child: Image.network(
-                                    //   '${Properties[index].image}',
-                                    //   height: 100,
-                                    //   width: double.infinity,
-                                    //   fit: BoxFit.fill,
-                                    // ),
+                                    child:
+                                        // Image.network(
+                                        //   '${Properties[index].image}',
+                                        //   height: 100,
+                                        //   width: double.infinity,
+                                        //   fit: BoxFit.fill,
+                                        // ),
+                                        Image.asset(
+                                      'images/download (1).jpg',
+                                      height: 130,
+                                      width: double.infinity,
+                                      fit: BoxFit.fill,
+                                    ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 70),
+                                  Center(
                                     child: Container(
                                       child: Column(
                                         children: [

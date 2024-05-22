@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:project_second/models/properties.dart';
 
@@ -13,22 +15,15 @@ class ApiServices {
   Future<List<Property>> getResidential() async {
     try {
       final Response<List<dynamic>> response =
-          await dio.get('/api/properties/Comm');
-
-      print("===========================================");
-      print(response.data);
-      print("===========================================");
+          await dio.get('/api/properties/Res');
       List<Property> properties = [];
-
       if (response.data != null) {
         properties = response.data!
             .map((e) => Property.fromJson(e as Map<String, dynamic>))
             .toList();
       }
-
       return properties;
     } catch (e) {
-      print('Error retrieving residential data: $e');
       rethrow;
     }
   }
@@ -47,7 +42,6 @@ class ApiServices {
 
       return properties;
     } catch (e) {
-      print('Error retrieving residential data: $e');
       rethrow;
     }
   }
@@ -56,9 +50,6 @@ class ApiServices {
     try {
       final Response<List<dynamic>> response =
           await dio.get('/api/properties/Comm');
-      print("====================ccccccccc=======================");
-      print(response.data);
-      print("=============================cccccccc==============");
       List<Property> properties = [];
 
       if (response.data != null) {
@@ -66,53 +57,42 @@ class ApiServices {
             .map((e) => Property.fromJson(e as Map<String, dynamic>))
             .toList();
       }
-
       return properties;
     } catch (e) {
-      print('Error retrieving residential data: $e');
       rethrow;
     }
   }
 
-  Future<Property?> getSingleCommercialByQuery(String search) async {
+  Future<List<Property>> getSingleCommercialByQuery(String search) async {
+    List<Property> prop = [];
     try {
-      final Response<Map<String, dynamic>> response = await dio.get(
-        '/api/properties//$search?', // Use "/Comm/$address" for commercial properties
-      );
-
+      final Response response = await dio.get('/api/properties/Res/$search?');
       if (response.data != null) {
-        return Property.fromJson(response.data!);
+        prop =
+            List<Property>.from(response.data.map((e) => Property.fromJson(e)));
       } else
         (error) {
-          print(error);
-          print("=============response.data=============");
           ; // Indicate no property found
         };
     } catch (e) {
-      print('Error retrieving commercial property by address: $e');
       // rethrow;
     }
+    return prop;
   }
 
   Future<Property?> getSingleResdentialByAddress(String search) async {
     try {
       final Response<Map<String, dynamic>> response = await dio.get(
-        '/api/properties/Comm/$search?', // Use "/Comm/$address" for commercial properties
+        '/api/properties/Res/$search?', // Use "/Comm/$address" for commercial properties
       );
 
       if (response.data != null) {
         return Property.fromJson(response.data!);
-        print("=============response.data=============");
-        print(response);
-        print("=============response.data=============");
       } else
         (error) {
-          print(error);
-          print("=============response.data=============");
           ; // Indicate no property found
         };
     } catch (e) {
-      print('Error retrieving commercial property by address: $e');
       // rethrow;
     }
   }
@@ -120,110 +100,92 @@ class ApiServices {
   Future<Property?> getSingleCommercialByAddress(String search) async {
     try {
       final Response<Map<String, dynamic>> response = await dio.get(
-        '/api/properties/Comm/$search?', // Use "/Comm/$address" for commercial properties
+        '/api /properties/Res/$search?', // Use "/Comm/$address" for commercial properties
       );
 
       if (response.data != null) {
         return Property.fromJson(response.data!);
-        print("=============response.data=============");
-        print(response);
-        print("=============response.data=============");
       } else
         (error) {
-          print(error);
-          print("=============response.data=============");
-          ; // Indicate no property found
+// Indicate no property found
         };
     } catch (e) {
-      print('Error retrieving commercial property by address: $e');
       // rethrow;
     }
   }
 
-  Future<Property?> getSinglePropertyByAddress(String propertyaddress) async {
-    try {
-      final Response<Map<String, dynamic>> response = await dio.get(
-        '/api/properties$propertyaddress', // Use "/Comm/$address" for commercial properties
-      );
+  // Future<Property?> getSinglePropertyByAddress(String propertyaddress) async {
+  //   try {
+  //     final Response<Map<String, dynamic>> response = await dio.get(
+  //       '/api/properties$propertyaddress', // Use "/Comm/$address" for commercial properties
+  //     );
 
-      if (response.data != null) {
-        return Property.fromJson(response.data!);
-        print("=============response.data=============");
-        print(response);
-        print("=============response.data=============");
-      } else
-        (error) {
-          print(error);
-          print("=============response.data=============");
-          ; // Indicate no property found
-        };
-    } catch (e) {
-      print('Error retrieving commercial property by address: $e');
-      // rethrow;
-    }
-  }
+  //     if (response.data != null) {
+  //       return Property.fromJson(response.data!);
+  //     } else
+  //       (error) {
+  //         ; // Indicate no property found
+  //       };
+  //   } catch (e) {
+  //     // rethrow;
+  //   }
+  // }
 
-  Future<Property?> addNewResdential(Property property) async {
-    try {
-      final Response<Map<String, dynamic>> response =
-          await dio.post('/api/properties/Res', data: property.toJson());
+  // Future<Property?> addNewResdential(Property property) async {
+  //   try {
+  //     final response =
+  //         await dio.post('/api/properties/Res', data: property.toJson());
 
-      if (response.data != null) {
-        return Property.fromJson(response.data!);
-      }
+  //     // if (response.data != null) {
+  //     //   return Property.fromJson(response.data!);
+  //     // }
+  //     return null;
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
 
-      return null;
-    } catch (e) {
-      print('Error adding new residential property: $e');
-      return null;
-    }
-  }
+  // Future<Property?> addNewCommercial(Property property) async {
+  //   try {
+  //     final Response<Map<String, dynamic>> response =
+  //         await dio.post('/api/properties/Comm', data: property.toJson());
 
-  Future<Property?> addNewCommercial(Property property) async {
-    try {
-      final Response<Map<String, dynamic>> response =
-          await dio.post('/api/properties/Comm', data: property.toJson());
+  //     if (response.data != null) {
+  //       return Property.fromJson(response.data!);
+  //     }
 
-      if (response.data != null) {
-        return Property.fromJson(response.data!);
-      }
+  //     return null;
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
 
-      return null;
-    } catch (e) {
-      print('Error adding new residential property: $e');
-      return null;
-    }
-  }
+  // Future<Property?> deleteResidential(Property property) async {
+  //   try {
+  //     final Response<Map<String, dynamic>> response =
+  //         await dio.delete('/api/properties/Res/${property.id}');
 
-  Future<Property?> deleteResidential(Property property) async {
-    try {
-      final Response<Map<String, dynamic>> response =
-          await dio.delete('/api/properties/Res/${property.id}');
+  //     if (response.data != null) {
+  //       return Property.fromJson(response.data!);
+  //     }
 
-      if (response.data != null) {
-        return Property.fromJson(response.data!);
-      }
+  //     return null;
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
 
-      return null;
-    } catch (e) {
-      print('Error deleting residential property: $e');
-      return null;
-    }
-  }
+  // Future<Property?> deleteCommercial(Property property) async {
+  //   try {
+  //     final response = await dio.delete('/api/properties/Comm/${property.id}');
 
-  Future<Property?> deleteCommercial(Property property) async {
-    try {
-      final Response<Map<String, dynamic>> response =
-          await dio.delete('/api/properties/Comm/${property.id}');
+  //     if (response.data != null) {
+  //       return Property.fromJson(response.data!);
+  //     }
 
-      if (response.data != null) {
-        return Property.fromJson(response.data!);
-      }
-
-      return null;
-    } catch (e) {
-      print('Error deleting residential property: $e');
-      return null;
-    }
-  }
+  //     return null;
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
 }

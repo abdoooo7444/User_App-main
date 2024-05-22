@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:project_second/models/properties.dart';
 import 'package:project_second/models/tour_req_model.dart';
 import 'package:project_second/services/tour_request_api_servise.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -7,7 +8,7 @@ import 'package:table_calendar/table_calendar.dart';
 class TourRequestPage extends StatefulWidget {
   TourRequestPage({Key? key, required this.request}) : super(key: key);
 
-  final Map<String, dynamic> request;
+  final Property request;
 
   @override
   State<TourRequestPage> createState() => _TourRequestPageState();
@@ -50,15 +51,15 @@ class _TourRequestPageState extends State<TourRequestPage> {
           type: pervertula,
           date: selectedDay,
           selectedTourTime: selectedTourTime,
-          image: widget.request['image'],
-          latitude: widget.request['latitude'],
-          longitude: widget.request['longitude'],
-          propertyAddress: widget.request['propertyaddress'],
-          phoneNumber: widget.request['phoneNumber'],
-          propertyDetails: widget.request['moreDetails'],
+          image: widget.request.image,
+          latitude: widget.request.latitude,
+          longitude: widget.request.longitude,
+          propertyAddress: widget.request.propertyaddress,
+          phoneNumber: widget.request.phoneNumber,
+          propertyDetails: widget.request.moreDetails,
           // propertyPrice: widget.request['price'],
-          rentDuration: widget.request['rentDuration'],
-          propertyStatus: widget.request['propertyStatus'],
+          rentDuration: widget.request.rentDuration,
+          propertyStatus: widget.request.status,
         );
 
         await tourApiServices().addNewTour(request);

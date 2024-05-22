@@ -14,9 +14,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
 
 class SingleProperty extends StatefulWidget {
-  final Map<String, dynamic> data;
+  final Property data;
 
-  const SingleProperty({super.key, this.data = const {}});
+  const SingleProperty({super.key, required this.data});
   @override
   State<SingleProperty> createState() => _CCState();
 }
@@ -29,7 +29,7 @@ final numberController = TextEditingController();
 
 ///
 
-bool isFavorite = false;
+// bool isFavorite = false;
 
 ///
 // GoogleMapController? gmc;
@@ -96,13 +96,25 @@ class _CCState extends State<SingleProperty> {
     super.initState();
   }
 
-  Future<bool> checkFavoriteStatus() async {
+  bool isFavorite = false;
+
+  Future<void> checkFavoriteStatus() async {
     try {
-      final Favorite = await favouriteApiServices().checkIfFavourite(favourite);
-      return isFavorite = true;
+      final status = await favouriteApiServices().checkIfFavourite(widget.data);
+      setState(() {
+        isFavorite = status;
+        print(
+            "============================================================================");
+        print(isFavorite);
+        print(status);
+        print(
+            "============================================================================");
+      });
     } catch (e) {
       print('Error checking favorite status: $e');
-      return false; // Default to not favorite if there's an error
+      setState(() {
+        isFavorite = false; // Default to not favorite if there's an error
+      });
     }
   }
 
@@ -128,7 +140,6 @@ class _CCState extends State<SingleProperty> {
     }
   }
 
-  bool isFavorite = false;
   Property favourite = Property();
 
   @override
@@ -156,20 +167,23 @@ class _CCState extends State<SingleProperty> {
             //   width: double.infinity,
             //   fit: BoxFit.cover,
             // ),
+            child: Image.asset(
+              'images/download.jpg',
+              height: 160,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
           ),
           GestureDetector(
             onTap: () async {
               try {
-                if (!isFavorite) {
-                  favourite = Property.fromJson(
-                    widget.data,
-                  );
+                if (isFavorite == false) {
                   //               favourite = Property.fromJson({
                   //   ...widget.data,
                   //   'color': color,
                   // });
                   // The property is not in favorites, so add it
-                  favouriteApiServices().addtoFavourite(favourite);
+                  favouriteApiServices().addtoFavourite(widget.data);
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -178,7 +192,8 @@ class _CCState extends State<SingleProperty> {
                     ),
                   );
                 } else {
-                  // The property is already in favorites
+                  favouriteApiServices().removeFromFavourite(widget.data);
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       backgroundColor: Colors.red,
@@ -215,7 +230,7 @@ class _CCState extends State<SingleProperty> {
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Text(
-                "A ${widget.data['type']} for ${widget.data['status']} in ${widget.data['propertyaddress']}   \n ${widget.data['moreDetails']} \n the ${widget.data['status']} price is: ${widget.data['price']} \$ \n is empty for ${widget.data['rentDuration']} Months ",
+                "A ${widget.data.type} for ${widget.data.status} in ${widget.data.propertyaddress}  \n the ${widget.data.status} price is: ${widget.data.price} \$ \n is empty for ${widget.data.rentDuration} Months  \n details : ${widget.data.moreDetails} ",
                 style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -355,7 +370,7 @@ class _CCState extends State<SingleProperty> {
                                   child: GestureDetector(
                                     onTap: () {
                                       applyDiscount(15);
-                                      '${widget.data['price']}';
+                                      '${widget.data.price}';
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
@@ -388,7 +403,7 @@ class _CCState extends State<SingleProperty> {
                               child: Padding(
                                 padding: const EdgeInsets.only(left: 16),
                                 child: Text(
-                                  "${widget.data['status']} you want",
+                                  "${widget.data.status} you want",
                                   style: const TextStyle(
                                       fontSize: 18, fontFamily: "Inria Serif"),
                                 ),
@@ -403,7 +418,7 @@ class _CCState extends State<SingleProperty> {
                                 decoration: InputDecoration(
                                   labelStyle: const TextStyle(
                                       fontFamily: "Inria Serif"),
-                                  labelText: '${widget.data['price']}',
+                                  labelText: '${widget.data.price}',
                                   fillColor: Colors.grey,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),
@@ -510,20 +525,19 @@ class _CCState extends State<SingleProperty> {
                                   onPressed: () async {
                                     try {
                                       final offer = Offers(
-                                        type: widget.data['type'],
+                                        type: widget.data.type,
                                         propertyaddress:
-                                            widget.data['propertyaddress'],
+                                            widget.data.propertyaddress,
                                         username: nameController.text,
                                         email: mailController.text,
                                         // price: int.parse(widget.data['price']),
                                         phoneNumber: numberController
                                             .text, // Improved error handling
-                                        moreDetails: widget.data['type'],
-                                        rentDuration:
-                                            widget.data['rentDuration'],
+                                        moreDetails: widget.data.type,
+                                        rentDuration: widget.data.rentDuration,
                                         propPrice:
                                             int.tryParse(rentController.text),
-                                        image: widget.data['image'],
+                                        image: widget.data.image,
                                         // latitude: double.tryParse(widget.data[
                                         // 'latitude']), // More robust parsing
                                         // longitude: double.tryParse(widget.data[
@@ -669,7 +683,7 @@ class _CCState extends State<SingleProperty> {
               ),
               InkWell(
                 onTap: () {
-                  launchPhoneDialer('${widget.data['phoneNumber']}');
+                  launchPhoneDialer('${widget.data.phoneNumber}');
                 },
                 child: Image.asset(
                   'Assets/44.jpg',
@@ -693,7 +707,7 @@ class _CCState extends State<SingleProperty> {
           .collection(
               'ResidentialProperty') // Replace with your actual collection name
           .doc(
-              '${widget.data['propertyPrice']}') // Use widget.data['ss'] as the document ID
+              '${widget.data.price}') // Use widget.data['ss'] as the document ID
           .get();
 
       Map<String, dynamic> data = snapshot.data() ?? {};
@@ -725,11 +739,11 @@ class _CCState extends State<SingleProperty> {
   }
 }
 
-// void ShowSnackBar(BuildContext context, String message, Color color) {
-//   final snackBar = SnackBar(
-//     content: Text(message),
-//     backgroundColor: Colors.green, // Set the background color here
-//   );
+void ShowSnackBar(BuildContext context, String message, Color color) {
+  final snackBar = SnackBar(
+    content: Text(message),
+    backgroundColor: Colors.green, // Set the background color here
+  );
 
-//   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-// }
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}

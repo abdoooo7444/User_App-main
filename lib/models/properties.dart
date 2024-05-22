@@ -6,7 +6,7 @@ class Property {
   String? image;
   String? propertyaddress;
   int? price;
-  int? phoneNmber;
+  int? phoneNumber;
   String? moreDetails;
   String? rentDuration;
   double? latitude;
@@ -22,7 +22,7 @@ class Property {
     this.color,
     this.propertyaddress,
     this.price,
-    this.phoneNmber,
+    this.phoneNumber,
     this.moreDetails,
     this.rentDuration,
     this.image,
@@ -39,7 +39,7 @@ class Property {
         type: json['type'] as String?,
         propertyaddress: json['propertyaddress'] as String?,
         price: json['price'] as int?,
-        phoneNmber: json['PhoneNmber'] as int?,
+        phoneNumber: json['phoneNumber'] as int?,
         moreDetails: json['moreDetails'] as String?,
         image: json['image'] as String?,
         rentDuration: json['rentDuration'] as String?,
@@ -48,14 +48,14 @@ class Property {
         v: json['__v'] as int?,
       );
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson(Property data) => {
         '_id': id,
 //  'kind': kind,
         'type': type,
         'status': status,
         'propertyaddress': propertyaddress,
         'price': price,
-        'PhoneNmber': phoneNmber,
+        'phoneNumber': phoneNumber,
         'moreDetails': moreDetails,
         'color': color,
         'rentDuration': rentDuration,
@@ -73,7 +73,7 @@ class Property {
         'color': color,
         'propertyaddress': propertyaddress,
         'price': price,
-        'Phonember': phoneNmber, // Corrected typo
+        'phoneNumber': phoneNumber, // Corrected typo
         'moreDetails': moreDetails,
         'rentDuration': rentDuration,
         'image': image,

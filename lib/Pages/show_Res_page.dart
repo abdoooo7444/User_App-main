@@ -24,8 +24,7 @@ class _HomePageState extends State<ShowResdential> {
       setState(() {
         isloading = true;
       });
-      final data = await ApiServices().getcommercials();
-      resdintial = data;
+      final resdintial = await ApiServices().getResidential();
       setState(() {
         isloading = false;
       });
@@ -58,25 +57,13 @@ class _HomePageState extends State<ShowResdential> {
     try {
       Property? property = await _searchCommercialProperty(address);
       if (property != null) {
-        // Convert Property object to Map<String, dynamic>
-        Map<String, dynamic> propertyMap = {
-          'propertyaddress': property.propertyaddress,
-          'image': property.image,
-          'status': property.status,
-          'kind': property.kind,
-          'moreDetails': property.moreDetails,
-          'phoneNmber': property.phoneNmber,
-          'price': property.price,
-          'rentDuration': property.rentDuration,
-          'type': property.type,
-        };
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => SingleProperty(data: propertyMap),
+        //   ),
+        // );
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SingleProperty(data: propertyMap),
-          ),
-        );
         print("Found commercial property: ${property.propertyaddress}");
       } else {
         print("No commercial property found at $address");
@@ -159,7 +146,7 @@ class _HomePageState extends State<ShowResdential> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => SingleProperty(
-                                  data: resdintial[index].toMap(),
+                                  data: resdintial[index],
                                 ),
                               ));
                         },
@@ -191,7 +178,7 @@ class _HomePageState extends State<ShowResdential> {
                                           padding:
                                               const EdgeInsets.only(left: 10),
                                           child: Text(
-                                            '${resdintial[index].kind}',
+                                            '${resdintial[index].status}',
                                             style: const TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,

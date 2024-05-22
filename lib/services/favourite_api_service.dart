@@ -13,7 +13,7 @@ class favouriteApiServices {
   Future<Property?> addtoFavourite(Property favourite) async {
     try {
       final Response<Map<String, dynamic>> response =
-          await dio.post('/api/favourites', data: favourite.toJson());
+          await dio.post('/api/favourites', data: favourite.toJson(favourite));
 
       if (response.data != null) {
         return Property.fromJson(response.data!);
@@ -31,7 +31,6 @@ class favouriteApiServices {
       Response response =
           await dio.get('/api/favourites/${favourite.propertyaddress}');
       response = await dio.get('/api/favourites/${favourite.price}');
-      print(response.data);
     } catch (e) {
       print('Error getting single favourite: $e');
     }
@@ -47,18 +46,20 @@ class favouriteApiServices {
             .map((e) => Property.fromJson(e as Map<String, dynamic>))
             .toList();
       }
-
       return properties;
     } catch (e) {
-      print('Error retrieving residential data: $e');
       rethrow;
     }
   }
 
   Future<Property?> removeFromFavourite(Property favourite) async {
     try {
+      print("========================================");
+      print(favourite.kind);
+      print(favourite.id);
+      print("========================================");
       final Response<Map<String, dynamic>> response =
-          await dio.delete('/api/favourites${favourite.id}');
+          await dio.delete('/api/favourites/${favourite.id}');
 
       if (response.data != null) {
         return Property.fromJson(response.data!);
@@ -74,19 +75,20 @@ class favouriteApiServices {
   Future<bool> checkIfFavourite(Property favourite) async {
     try {
       final response = await dio.get(
-        '/api/favorites${favourite.id}', // Replace with your actual endpoint
+        '/api/favourites/${favourite.id}',
       );
-      return response.statusCode ==
-          200; // Property is a favorite if status code is 200
+      print('===========================================');
+      print(response.data);
+      print('===========================================');
+      return true;
+      // ignore: deprecated_member_use
     } on DioError catch (e) {
       if (e.response?.statusCode == 404) {
-        return false; // Property is not a favorite if status code is 404
+        return false;
       }
-      print('Error checking favorite status: ${e.message}');
-      return false; // Default to not favorite for other errors
+      return false;
     } catch (e) {
-      print('Unexpected error checking favorite status: $e');
-      return false; // Default to not favorite for unexpected errors
+      return false;
     }
   }
 }

@@ -55,7 +55,7 @@ class _ShowPropertyState extends State<ShowProperty> {
                                           MaterialPageRoute(
                                             builder: (context) =>
                                                 SingleProperty(
-                                              data: residential[index].toMap(),
+                                              data: residential[index],
                                             ),
                                           ))
                                       : Navigator.push(
@@ -63,7 +63,7 @@ class _ShowPropertyState extends State<ShowProperty> {
                                           MaterialPageRoute(
                                             builder: (context) =>
                                                 SingleProperty(
-                                              data: commercial[index].toMap(),
+                                              data: commercial[index],
                                             ),
                                           ));
                                 },
@@ -107,8 +107,7 @@ class _ShowPropertyState extends State<ShowProperty> {
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   SingleProperty(
-                                                data:
-                                                    residential[index].toMap(),
+                                                data: residential[index],
                                               ),
                                             ))
                                         : Navigator.push(
@@ -116,7 +115,7 @@ class _ShowPropertyState extends State<ShowProperty> {
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   SingleProperty(
-                                                data: commercial[index].toMap(),
+                                                data: commercial[index],
                                               ),
                                             ));
                                   },

@@ -168,8 +168,8 @@ class _FavoritesState extends State<Favorites> {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => SingleProperty(
-                                  data: favourites[index].toMap()),
+                              builder: (context) =>
+                                  SingleProperty(data: favourites[index]),
                             ),
                           );
                         },
@@ -182,7 +182,7 @@ class _FavoritesState extends State<Favorites> {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (context) => SingleProperty(
-                                          data: favourites[index].toMap()),
+                                          data: favourites[index]),
                                     ),
                                   );
                                 },
